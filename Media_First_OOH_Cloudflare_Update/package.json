@@ -1,0 +1,22 @@
+{
+  "name": "media-first-ooh-cloudflare",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create media-first-ooh-platform",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "db:seed:local": "wrangler d1 execute DB --local --file=./data/seed_inventory.sql",
+    "db:seed:remote": "wrangler d1 execute DB --remote --file=./data/seed_inventory.sql",
+    "check": "node --check src/worker.js && node --check src/sheets.js",
+    "validate": "python3 scripts/validate.py",
+    "test:sheets": "node scripts/test-sheets.mjs",
+    "test": "npm run check && npm run test:sheets && npm run validate"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

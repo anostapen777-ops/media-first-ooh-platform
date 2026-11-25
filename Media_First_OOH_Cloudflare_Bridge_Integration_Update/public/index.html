@@ -1,0 +1,525 @@
+<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Media First | OOH Planning Platform</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--navy:#10283f;--navy2:#183b58;--blue:#005EFF;--blue2:#005EFF;--lime:#25FF08;--lime2:#25FF08;--bg:#f3f5f8;--ink:#1c2d3d;--muted:#718194;--line:#dfe6ed;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,Arial,sans-serif}
+header{background:var(--navy);color:#fff;padding:17px 26px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:4px solid var(--lime)}
+.brand{display:flex;align-items:center;gap:20px}.brand img{width:185px;max-height:42px;object-fit:contain}.brandcopy{border-left:1px solid #526a7d;padding-left:18px}.brandcopy b{font-size:17px;letter-spacing:.06em}.brandcopy small{display:block;color:#c2ced8;font-size:12px;margin-top:3px}.headright{font-size:11px;color:#c2ced8;text-align:right;letter-spacing:.1em}
+.standalone-note{max-width:1800px;margin:12px auto 0;padding:10px 14px;border:1px solid #d9e3ee;border-left:4px solid var(--blue);border-radius:9px;background:#fff;color:#586b7e;font-size:11px;line-height:1.45}.standalone-note b{color:var(--navy)}.headright small{display:inline-block;margin-top:4px;color:var(--lime);font-size:10px;letter-spacing:.08em}
+main{padding:18px 22px;max-width:1850px;margin:auto}.kpis{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:12px;margin-bottom:14px}
+.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #15283c08}.kpi{padding:14px 17px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;left:0;bottom:0;height:4px;width:100%;background:var(--lime)}.kpi strong{display:block;font-size:25px;letter-spacing:-.04em;color:var(--navy)}.kpi span{color:var(--muted);font-size:12px}
+.filters{padding:13px;display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-bottom:14px}.field{display:flex;flex-direction:column;gap:5px;min-width:140px;flex:1}.field label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+select,input{height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:#fff;color:var(--ink);font:inherit;min-width:0}select:focus,input:focus{outline:2px solid #005EFF33;border-color:var(--blue)}
+button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 12px;font:600 13px Arial,sans-serif;color:var(--ink);cursor:pointer}button:hover{border-color:var(--blue)}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button.lime{background:var(--lime);border-color:var(--lime);color:var(--navy)}button:disabled{opacity:.5;cursor:not-allowed}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 325px;gap:14px;align-items:start}.map-panel{overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 17px;border-bottom:1px solid var(--line);gap:10px}.panel-head h2{margin:0;font-size:16px;color:var(--navy)}.panel-head small{color:var(--muted)}
+#map{height:660px;width:100%;background:#e8edf1}.side{display:flex;flex-direction:column;gap:13px}.side .panel{padding:14px}.side h3{margin:0 0 11px;font-size:14px;color:var(--navy)}
+.layerrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #edf0f4}.layerrow:last-of-type{border:0}.layerrow input{width:16px;height:16px;accent-color:var(--blue)}.dot{width:13px;height:13px;display:inline-block;flex:none}.dot.promo{background:var(--blue);border-radius:50%}.dot.local{background:var(--lime);border:2px solid #25FF08;transform:rotate(45deg);border-radius:2px}.dot.restaurant{background:#b5232f;border-radius:50%}
+.legend-note{font-size:11px;color:var(--muted);margin:8px 0 0}.barlist{display:flex;flex-direction:column;gap:9px}.barrow{display:grid;grid-template-columns:90px 1fr 35px;gap:8px;align-items:center;font-size:12px}.bartrack{height:8px;background:#edf1f5;border-radius:8px;overflow:hidden}.barfill{height:100%;background:var(--blue);border-radius:8px}.barrow:nth-child(2n) .barfill{background:#25FF08}.barrow em{font-style:normal;text-align:right;color:var(--muted)}
+.marker-selected{outline:3px solid var(--lime);outline-offset:2px;filter:drop-shadow(0 0 4px #25FF08)}.marker-promo{background:var(--blue);border:2px solid white;border-radius:50%;width:15px;height:15px;box-shadow:0 1px 6px #0006}.marker-local{background:var(--lime);border:2px solid white;border-radius:3px;width:15px;height:15px;transform:rotate(45deg);box-shadow:0 1px 6px #0006}.marker-kfc{background:#b5232f;border:2px solid white;border-radius:50%;color:white;font-weight:900;font-size:9px;width:29px;height:29px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px #0007}
+.leaflet-popup-content{font:13px/1.4 Arial}.popup-title{font-weight:700;margin-bottom:4px}.popup-meta{color:#657386}
+.modal{display:none;position:fixed;inset:0;background:#071522a8;z-index:2000;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.modalbox{background:white;border-radius:16px;max-width:980px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 80px #0004}.modalhead{position:sticky;top:0;background:white;padding:15px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;z-index:1}.modalhead h2{font-size:18px;margin:0;color:var(--navy)}.modalbody{padding:19px}.photos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.photo-card{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fafbfd;min-width:0}.photo-card img{width:100%;height:245px;object-fit:contain;background:#f1f3f6;border-radius:7px}.photo-card a{display:inline-block;color:var(--blue);font-size:12px;margin-top:7px}.photo-fallback{height:245px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:15px;background:#f1f3f6;border-radius:7px}.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}.detail{padding:8px 0;border-bottom:1px solid #edf0f3;min-width:0}.detail label{display:block;color:var(--muted);font-size:11px}.detail b{display:block;overflow-wrap:anywhere;font-size:13px;color:var(--ink)}
+.selected-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto}.selected-item{padding:8px 0;border-bottom:1px solid #edf0f3;display:flex;gap:8px;align-items:flex-start}.selected-item:last-child{border:0}.selected-item-main{flex:1;min-width:0}.selected-item small{display:block;color:var(--muted)}.selected-item button{padding:4px 7px;font-size:11px}.selection-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.selection-actions button{flex:1}.role-chip{display:inline-flex;align-items:center;background:#eaf0ff;color:#005EFF;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700}.sync-note{font-size:12px;line-height:1.45;color:var(--muted);padding:10px;border-radius:9px;background:#f5f8e9;border-left:3px solid var(--lime)}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.workspace{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,1fr)}#map{height:560px}}
+@media(max-width:650px){header{padding:13px;align-items:flex-start}.brand img{width:120px}.brandcopy b{font-size:13px}.headright{display:none}main{padding:11px}.kpis{grid-template-columns:repeat(2,1fr)}.side{display:flex}.filters .field{min-width:calc(50% - 8px)}#map{height:480px}.photos,.details{grid-template-columns:1fr}.panel-head{align-items:flex-start;flex-direction:column}}
+
+/* Cloudflare version: account and administration surfaces */
+.auth-overlay,.users-overlay{position:fixed;inset:0;background:rgba(8,24,39,.76);z-index:3000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px)}
+.auth-overlay[hidden],.users-overlay[hidden]{display:none!important}
+.auth-card,.users-card{width:min(100%,460px);background:#fff;border-radius:18px;padding:26px;box-shadow:0 24px 80px #08182755;max-height:92vh;overflow:auto}
+.auth-card h2,.users-card h2{margin:0 0 7px;color:var(--navy);font-size:22px}
+.auth-card p,.users-card p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.auth-field{display:grid;gap:6px;margin:12px 0}.auth-field label{font-weight:700;font-size:12px;color:#47596b}.auth-field input,.auth-field select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font:inherit}
+.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.auth-actions button{flex:1;min-width:125px}
+.auth-error{color:#b42318;background:#fff1f0;border:1px solid #ffd2ce;border-radius:8px;padding:9px 11px;font-size:12px;margin-top:12px;display:none}.auth-error.show{display:block}
+.account-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-left:auto}.account-toolbar[hidden]{display:none!important}
+.account-toolbar .account-label{font-size:11px;color:#d5e0e9;letter-spacing:.02em}.account-toolbar button{font-size:11px;padding:7px 10px;border-radius:7px}
+.user-row{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.user-row small{display:block;color:var(--muted);margin-top:2px}.user-row button{padding:6px 9px;font-size:11px}
+.role-tag{display:inline-block;padding:3px 7px;border-radius:99px;background:#eaf1ff;color:#005EFF;font-size:10px;font-weight:800;margin-left:6px}
+@media(max-width:760px){.account-toolbar{width:100%;justify-content:flex-start;margin:8px 0 0}.account-toolbar .account-label{width:100%}.auth-card,.users-card{padding:20px}}
+
+</style></head><body>
+<header><div class="brand"><img src="data:image/png;base64,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" alt="Media First"><div class="brandcopy"><b>OOH PLANNING PLATFORM</b><small>KFC · інтерактивна адресна програма</small></div></div><div class="headright">MEDIA PLANNING · UKRAINE<br><small>CLOUDFLARE · GOOGLE APPS SCRIPT BRIDGE</small></div><div class="account-toolbar" id="account-toolbar" hidden><span class="account-label" id="account-label"></span><button id="manage-users" type="button">Доступи</button><button class="lime" id="connect-google" type="button">Google Bridge</button><button id="test-email" type="button" hidden>Тест Gmail</button><button id="logout" type="button">Вийти</button></div></header>
+<aside class="standalone-note"><b>Media First OOH · Cloudflare.</b> Дані, вибрані площини та програми зберігаються на сервері окремо для кожного користувача. Після синхронізації карта оновлюється автоматично у відкритих сесіях.</aside>
+<main>
+<section class="kpis">
+<div class="kpi"><strong id="kpi-count">—</strong><span>Рекламних площин</span></div>
+<div class="kpi"><strong id="kpi-ots">—</strong><span>Сумарний OTS</span></div>
+<div class="kpi"><strong id="kpi-budget">—</strong><span>Бюджет, UAH Net</span></div>
+<div class="kpi"><strong id="kpi-cities">—</strong><span>Міст у відборі</span></div>
+<div class="kpi"><strong id="kpi-rest">—</strong><span>Ресторанів KFC</span></div>
+<div class="kpi"><strong id="kpi-selected">0</strong><span>Обрано площин</span></div>
+<div class="kpi"><strong id="kpi-selected-budget">0 ₴</strong><span>Бюджет обраного</span></div>
+</section>
+<section class="panel filters">
+<div class="field"><label>Кампанія</label><select id="f-campaign"><option value="">Усі кампанії</option></select></div>
+<div class="field"><label>Місто</label><select id="f-city"><option value="">Усі міста</option></select></div>
+<div class="field"><label>Партнер</label><select id="f-partner"><option value="">Усі партнери</option></select></div>
+<div class="field"><label>Формат реклами</label><select id="f-adformat"><option value="">Усі формати</option></select></div>
+<div class="field"><label>Тип</label><select id="f-type"><option value="">Усі типи</option></select></div>
+<div class="field"><label>Ресторан</label><select id="f-restaurant"><option value="">Усі ресторани</option></select></div>
+<div class="field"><label>Пошук</label><input id="f-search" placeholder="Адреса, код, ресторан..."></div>
+<button id="reset">Скинути</button>
+</section>
+<div class="workspace">
+<section class="panel map-panel"><div class="panel-head"><div><h2>Карта рекламних площин та ресторанів</h2><small id="map-subtitle">Дані завантажуються з Cloudflare D1</small></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="fit">Показати всі точки</button><button class="lime" id="sync">Оновити з Google Sheets</button></div></div><div id="map"></div></section>
+<aside class="side">
+<section class="panel"><h3>Шари карти</h3>
+<div id="layer-controls"><div class="legend-note">Завантажуємо конфігурацію шарів…</div></div>
+<p class="legend-note">Нові вкладки з колонками «Місто», «Широта», «Довгота» додаються автоматично. Назви й кольори можна задати у вкладці «Налаштування шарів».</p></section>
+<section class="panel"><h3>Аналітика за містами</h3><div id="city-bars" class="barlist"></div></section>
+<section class="panel"><h3>Розподіл за партнерами</h3><div id="partner-bars" class="barlist"></div></section>
+<section class="panel" id="selection-panel">
+<h3>Моя адресна програма</h3>
+<div class="role-chip">Ваш робочий простір</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+  <div><div class="legend-note">Обрано</div><strong id="selection-count">0 площин</strong></div>
+  <div><div class="legend-note">Бюджет</div><strong id="selection-budget">0 ₴</strong></div>
+</div>
+<div class="field" style="min-width:0;margin-bottom:8px"><label>Назва підбірки</label><input id="selection-name" value="Нова адресна програма"></div>
+<div class="selected-list" id="selected-list"><div class="empty">Поки немає обраних площин. Відкрий картку борда та натисни «Обрати площину».</div></div>
+<div class="selection-actions">
+  <button class="primary" id="save-selection">Зберегти</button>
+  <button id="export-selection">Завантажити Excel</button>
+</div>
+<div class="field" style="min-width:0;margin-top:10px"><label>Email отримувача</label><input id="selection-email" type="email" placeholder="name@company.com"></div>
+<button class="lime" id="email-selection" style="width:100%;margin-top:8px">Надіслати Excel на email</button>
+<div class="legend-note" id="selection-status">Вибрані площини та адресні програми зберігаються у вашому обліковому записі.</div><div id="saved-programs-list" class="saved-programs-list" style="margin-top:12px"></div>
+</section>
+<section class="panel"><h3>Джерело даних</h3><div class="sync-note" id="sync-status">База даних Media First. Синхронізація з Google Sheets доступна адміністратору.</div><p class="legend-note">Усі видимі вкладки з валідною структурою координат визначаються автоматично. Таблиця може містити будь-яку кількість рекламних шарів.</p></section>
+<section class="panel" id="drive-library-panel" hidden>
+  <h3>Бібліотека фото та схем</h3>
+  <p class="legend-note">Платформа сама завантажує доступні фото й схеми за посиланнями з Google Sheets у приватну папку Google Drive. Вручну переносити файли не потрібно. Матеріали, захищені авторизацією або заблоковані партнером, потраплять у список для перевірки.</p>
+  <div class="sync-note" id="drive-library-status">Статус бібліотеки ще не перевірено.</div>
+  <button class="lime" id="drive-library-start" type="button" style="width:100%;margin-top:8px">Автоматично скопіювати фото та схеми</button>
+  <div class="legend-note" style="margin-top:8px">Оригінальні посилання в Google Sheets не змінюються. Копії зберігаються в папках Photos та Schemes у Google Drive.</div>
+</section>
+</aside></div></main>
+<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modal-title">Деталі об’єкта</h2><button id="close">Закрити ✕</button></div><div class="modalbody" id="modalbody"></div></div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const DATA=[];
+// Нормалізація назв кампаній і партнерів для єдиних фільтрів та аналітики.
+for (const x of DATA) {
+  const norm = v => {
+    if (typeof v !== 'string') return v;
+    const s = v.trim();
+    if (s === 'Локальный' || s === 'Локальний') return 'Локальний';
+    if (s === 'DTS' || s === 'DTS-Kharkiv') return 'DTS-Kharkiv';
+    return v;
+  };
+  x._campaign = norm(x._campaign);
+  x._partner = norm(x._partner);
+  for (const k of ['Кампанія','Маркетинг','Партнер','Компанія']) {
+    if (Object.prototype.hasOwnProperty.call(x,k)) x[k] = norm(x[k]);
+  }
+}
+
+// Демонстраційний конструктор адресної програми.
+// У production selectedIds/savedPrograms будуть зберігатися в Supabase, не в localStorage.
+const SELECTION_STORAGE_KEY='mf_ooh_selected_v1';
+const PROGRAMS_STORAGE_KEY='mf_ooh_programs_v1';
+const selectedIds=new Set(JSON.parse(localStorage.getItem(SELECTION_STORAGE_KEY)||'[]'));
+let savedPrograms=JSON.parse(localStorage.getItem(PROGRAMS_STORAGE_KEY)||'[]');
+const rowId=x=>String(x._id||`${x._source_sheet||x._layer}:${x._row||x._title}`);
+const selectedRows=()=>DATA.filter(x=>selectedIds.has(rowId(x)));
+const selectedTotal=()=>selectedRows().reduce((s,x)=>{const n=Number(x['Тотал, UAH, Net']);return s+(Number.isFinite(n)?n:0)},0);
+const fmtMoney=n=>Number(n||0).toLocaleString('uk-UA',{maximumFractionDigits:2})+' ₴';
+function persistSelection(){localStorage.setItem(SELECTION_STORAGE_KEY,JSON.stringify([...selectedIds]));}
+function toggleSelection(x){
+ const id=rowId(x);
+ if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
+ persistSelection();render();openDetails(x);
+}
+function renderSelection(){
+ const rows=selectedRows(),total=selectedTotal();
+ $('kpi-selected').textContent=fmt(rows.length);
+ $('kpi-selected-budget').textContent=fmtMoney(total);
+ $('selection-count').textContent=rows.length+' площин';
+ $('selection-budget').textContent=fmtMoney(total);
+ $('selected-list').innerHTML=rows.length?rows.map(x=>`<div class="selected-item"><div class="selected-item-main"><b>${esc(x._city||'')} · ${esc(x._title||'')}</b><small>${esc(x['Новий Код']||x['Код']||'')} · ${fmtMoney(x['Тотал, UAH, Net'])}</small></div><button data-remove="${esc(rowId(x))}">Прибрати</button></div>`).join(''):'<div class="empty">Поки немає обраних площин. Відкрий картку борда та натисни «Обрати площину».</div>';
+ document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{selectedIds.delete(b.dataset.remove);persistSelection();render()});
+}
+function saveProgram(){
+ const name=$('selection-name').value.trim()||'Адресна програма';
+ const rows=selectedRows();
+ if(!rows.length){$('selection-status').textContent='Спочатку обери хоча б одну площину.';return}
+ const program={id:'p'+Date.now(),name,createdAt:new Date().toISOString(),ids:rows.map(rowId)};
+ savedPrograms=[...savedPrograms.filter(p=>p.name!==name),program];
+ localStorage.setItem(PROGRAMS_STORAGE_KEY,JSON.stringify(savedPrograms));
+ $('selection-status').textContent=`Підбірку «${name}» збережено в цьому браузері (${rows.length} площин).`;
+}
+function exportProgram(){
+ const rows=selectedRows();
+ if(!rows.length){$('selection-status').textContent='Немає обраних площин для експорту.';return}
+ if(!window.XLSX){$('selection-status').textContent='Не завантажилася бібліотека Excel. Перевір інтернет-з’єднання.';return}
+ const wb=XLSX.utils.book_new();
+ const sheetNames=['національна ООН','адреси ресторанів','локальна'];
+ let added=0;
+ sheetNames.forEach(sheetName=>{
+   const group=rows.filter(x=>x._source_sheet===sheetName);
+   if(!group.length)return;
+   const headers=[];
+   group.forEach(x=>Object.keys(x).forEach(k=>{if(!k.startsWith('_')&&!headers.includes(k))headers.push(k)}));
+   const exportRows=group.map(x=>{
+     const o={};
+     headers.forEach(k=>{
+       if(k==='Фото')o[k]=x._photo?'Фото':(x[k]||'');
+       else if(k==='Схема')o[k]=x._scheme?'Схема':(x[k]||'');
+       else if(x[k]!==null&&x[k]!==undefined)o[k]=x[k];
+     });
+     return o;
+   });
+   const ws=XLSX.utils.json_to_sheet(exportRows,{header:headers});
+   group.forEach((x,index)=>{
+     [['Фото',x._photo],['Схема',x._scheme]].forEach(([key,url])=>{
+       const col=headers.indexOf(key);
+       if(col<0||typeof url!=='string'||!/^https?:\/\//i.test(url))return;
+       const ref=XLSX.utils.encode_cell({r:index+1,c:col});
+       if(ws[ref])ws[ref].l={Target:url,Tooltip:key==='Фото'?'Відкрити фото':'Відкрити схему'};
+     });
+   });
+   XLSX.utils.book_append_sheet(wb,ws,finalName);
+   added+=group.length;
+ });
+ const safeName=($('selection-name').value.trim()||'OOH_адресна_програма').replace(/[\\/:*?"<>|]+/g,'_');
+ XLSX.writeFile(wb,safeName+'.xlsx');
+ $('selection-status').textContent=`Excel сформовано: ${added} площин у ${wb.SheetNames.length} вкладках, бюджет ${fmtMoney(selectedTotal())}.`;
+}
+function prepareEmail(){
+ const email=$('selection-email').value.trim();
+ if(!email||!email.includes('@')){$('selection-status').textContent='Вкажи коректну email-адресу.';return}
+ if(!selectedRows().length){$('selection-status').textContent='Спочатку обери площини.';return}
+ exportProgram();
+ const subject=encodeURIComponent($('selection-name').value.trim()||'OOH адресна програма');
+ const body=encodeURIComponent(`Вітаю!\\n\\nПідготувала адресну програму: ${selectedRows().length} площин, бюджет ${fmtMoney(selectedTotal())}.\\n\\nExcel-файл завантажено окремо — додай його до листа.`);
+ window.location.href=`mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
+ $('selection-status').textContent='Excel завантажено, відкриваю поштову програму. Додай файл до листа вручну. Автоматичне надсилання буде доступне після підключення backend.';
+}
+
+const GOOGLE_SYNC_ENDPOINT=''; // Після розгортання backend вказати URL захищеного API.
+const fmt=n=>n==null||!Number.isFinite(Number(n))?'—':Number(n).toLocaleString('uk-UA',{maximumFractionDigits:2});
+const money=n=>n==null||!Number.isFinite(Number(n))?'—':Number(n).toLocaleString('uk-UA',{maximumFractionDigits:0})+' ₴';
+const $=id=>document.getElementById(id), uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x).trim()!==''))].sort((a,b)=>String(a).localeCompare(String(b),'uk'));
+function fillSelect(id,values){uniq(values).forEach(v=>{let o=document.createElement('option');o.value=String(v);o.textContent=String(v);$(id).appendChild(o)})}
+function isRestaurant(x){return x?._layer==='restaurant'||x?._layer_kind==='restaurant'}
+function rebuildFilters(){['f-campaign','f-city','f-partner','f-adformat','f-type','f-restaurant'].forEach(id=>{const s=$(id),v=s.value;s.innerHTML='<option value="">'+({ 'f-campaign':'Усі кампанії','f-city':'Усі міста','f-partner':'Усі партнери','f-adformat':'Усі формати','f-type':'Усі типи','f-restaurant':'Усі ресторани'}[id])+'</option>';let vals=id==='f-campaign'?DATA.filter(x=>!isRestaurant(x)).map(x=>x._campaign):id==='f-city'?DATA.map(x=>x._city):id==='f-partner'?DATA.filter(x=>!isRestaurant(x)).map(x=>x._partner):id==='f-adformat'?DATA.filter(x=>!isRestaurant(x)).map(x=>x._adformat):id==='f-type'?DATA.filter(x=>!isRestaurant(x)).map(x=>x._type):DATA.map(x=>x['Ресторан']).filter(Boolean);fillSelect(id,vals);s.value=v})}
+rebuildFilters();
+const map=L.map('map',{zoomControl:true}).setView([49,31.2],6);
+const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'}).addTo(map);
+const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'© OpenStreetMap contributors'});
+L.control.layers({'Esri Street Map':esri,'OpenStreetMap':osm},null,{collapsed:true}).addTo(map);
+const groups={};let markers=[];const layerByKey=new Map();const visibleLayers=new Set();let inventoryRevision='';let autoRefreshTimer=null;let hasConfiguredLayers=false;
+function renderLayerControls(){
+ const target=$('layer-controls');if(!target)return;
+ const list=[...layerByKey.values()].sort((a,b)=>(Number(a.sort)||100)-(Number(b.sort)||100)||String(a.name).localeCompare(String(b.name),'uk'));
+ target.innerHTML=list.map(layer=>{const checked=visibleLayers.has(layer.key)?'checked':'';const transform=layer.shape==='diamond'?'transform:rotate(45deg);border-radius:2px':layer.shape==='pin'?'border-radius:50% 50% 50% 0;transform:rotate(-45deg)':'border-radius:4px';return `<label class="layerrow"><input type="checkbox" data-layer-toggle="${esc(layer.key)}" ${checked}><span style="width:13px;height:13px;display:inline-block;flex:none;background:${esc(layer.color)};${transform}"></span><span>${esc(layer.name)} <small style="color:var(--muted)">(${layer.count??DATA.filter(x=>x._layer===layer.key).length})</small></span></label>`}).join('')||'<div class="legend-note">Немає шарів із валідними координатами.</div>';
+ target.querySelectorAll('[data-layer-toggle]').forEach(input=>input.addEventListener('change',()=>{const key=input.dataset.layerToggle;if(input.checked){visibleLayers.add(key);groups[key]?.addTo(map)}else{visibleLayers.delete(key);if(groups[key])map.removeLayer(groups[key])}render()}));
+}
+function configureLayers(layers){
+ const previouslyVisible=new Set(visibleLayers),previouslyKnown=new Set(layerByKey.keys()),firstLoad=!hasConfiguredLayers;Object.entries(groups).forEach(([key,group])=>{map.removeLayer(group);group.clearLayers();delete groups[key]});layerByKey.clear();visibleLayers.clear();
+ (layers||[]).forEach(layer=>{if(!layer?.key)return;const clean={...layer,key:String(layer.key),name:String(layer.name||layer.sourceSheet||layer.key),color:/^#[0-9a-f]{6}$/i.test(layer.color||'')?layer.color:'#64748B',shape:['circle','diamond','square','pin'].includes(layer.shape)?layer.shape:'circle',kind:layer.kind==='restaurant'?'restaurant':'media',label:String(layer.label||'').slice(0,8)};layerByKey.set(clean.key,clean);groups[clean.key]=L.layerGroup();if(firstLoad||!previouslyKnown.has(clean.key)||previouslyVisible.has(clean.key)){visibleLayers.add(clean.key);groups[clean.key].addTo(map)}});
+ hasConfiguredLayers=true;renderLayerControls();
+}
+function activeRows(){const camp=$('f-campaign').value,city=$('f-city').value,partner=$('f-partner').value,ad=$('f-adformat').value,type=$('f-type').value,q=$('f-search').value.toLowerCase().trim(),rest=$('f-restaurant').value;
+ return DATA.filter(x=>{if(!visibleLayers.has(x._layer))return false;const restaurant=isRestaurant(x);if(restaurant){if(city&&x._city!==city)return false;if(q&&!(`${x._title} ${x._city} ${x['Адреса']||''}`).toLowerCase().includes(q))return false;return true}
+ if(camp&&x._campaign!==camp)return false;if(city&&x._city!==city)return false;if(partner&&x._partner!==partner)return false;if(ad&&x._adformat!==ad)return false;if(type&&x._type!==type)return false;if(rest&&x['Ресторан']!==rest)return false;if(q&&!JSON.stringify(x).toLowerCase().includes(q))return false;return true})}
+function iconFor(x,selected){const layer=layerByKey.get(x._layer)||{};const color=layer.color||'#64748B',shape=layer.shape||'circle',label=layer.label||'';const size=label?29:15;let shapeCss='border-radius:50%;';if(shape==='diamond')shapeCss='border-radius:3px;transform:rotate(45deg);';else if(shape==='square')shapeCss='border-radius:3px;';else if(shape==='pin')shapeCss='border-radius:50% 50% 50% 0;transform:rotate(-45deg);';const selectedCss=selected?'outline:3px solid #25FF08;outline-offset:2px;filter:drop-shadow(0 0 4px #25FF08);':'';const html=`<div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;background:${esc(color)};border:2px solid #fff;box-shadow:0 1px 6px #0007;color:white;font:900 8px Arial;${shapeCss}${selectedCss}">${esc(label)}</div>`;return L.divIcon({className:'',html,iconSize:[size,size],iconAnchor:[size/2,size/2]})}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){Object.values(groups).forEach(g=>g.clearLayers());markers=[];const rows=activeRows(),media=rows.filter(x=>!isRestaurant(x)),rests=rows.filter(x=>isRestaurant(x));
+ rows.forEach(x=>{const layer=x._layer;if(!Number.isFinite(Number(x._lat))||!Number.isFinite(Number(x._lon))||!groups[layer])return;const selected=selectedIds.has(rowId(x));const m=L.marker([Number(x._lat),Number(x._lon)],{icon:iconFor(x,selected)});m.bindPopup(`<div class="popup-title">${esc(x._title)}</div><div class="popup-meta">${esc(x._city)} · ${esc(x._campaign)}</div><div style="margin-top:6px;color:#005EFF">Відкрити деталі</div>`);m.on('click',()=>openDetails(x));m.addTo(groups[layer]);markers.push(m)});
+ const sum=key=>media.reduce((s,x)=>s+(Number.isFinite(Number(x[key]))?Number(x[key]):0),0);
+ $('kpi-count').textContent=fmt(media.length);$('kpi-ots').textContent=fmt(sum('OTS'));$('kpi-budget').textContent=money(sum('Тотал, UAH, Net'));$('kpi-cities').textContent=fmt(new Set(media.map(x=>x._city)).size);$('kpi-rest').textContent=fmt(rests.length);
+ $('map-subtitle').textContent=`${media.length} рекламних площин · ${rests.length} ресторанів у поточному відборі · ${layerByKey.size} шарів`;bars('city-bars',media,'_city',8);bars('partner-bars',media,'_partner',8);renderSelection()}
+function bars(id,rows,key,limit){const counts={};rows.forEach(x=>{const k=x[key]||'Не вказано';counts[k]=(counts[k]||0)+1});const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,limit),max=Math.max(1,...entries.map(x=>x[1]));$(id).innerHTML=entries.length?entries.map(([k,v])=>`<div class="barrow"><span title="${esc(k)}">${esc(k).slice(0,17)}</span><div class="bartrack"><div class="barfill" style="width:${v/max*100}%"></div></div><em>${v}</em></div>`).join(''):'<div class="legend-note">Немає даних за вибраними фільтрами</div>'}
+function mediaCard(kind,url){if(!url)return '';const driveId=url.match(/drive\.google\.com\/file\/d\/([^/]+)/i)?.[1]||url.match(/[?&]id=([^&]+)/i)?.[1];const previewUrl=driveId&&/drive\.google\.com/i.test(url)?`https://drive.google.com/uc?export=view&id=${encodeURIComponent(driveId)}`:url;const isImage=/\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(previewUrl)||/bma\.bigmedia\.ua\/photohub\/face\/\d+/i.test(previewUrl)||/drive\.google\.com\/uc\?export=view/i.test(previewUrl);const label=kind==='Фото'?'Відкрити фото':'Відкрити схему';return `<div class="photo-card">${isImage?`<img src="${esc(previewUrl)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;photo-fallback&quot;>Попередній перегляд недоступний<br>Відкрийте матеріал за посиланням нижче</div>'">`:`<div class="photo-fallback">${kind==='Фото'?'Фото зберігається на сторінці партнера':'Схема доступна на сторінці партнера'}</div>`}<a href="${esc(url)}" target="_blank" rel="noopener">${label} ↗</a></div>`}
+function openDetails(x){$('modal-title').textContent=x._title||'Деталі об’єкта';const fields=Object.entries(x).filter(([k,v])=>!k.startsWith('_')&&!['Фото','Схема','Довгота','Широта'].includes(k)&&v!==null&&v!==''&&!String(v).startsWith('=HYPERLINK'));
+const media=(x._photo?mediaCard('Фото',x._photo,x._photo_drive_url,x._photo_drive_link):'')+(x._scheme?mediaCard('Схема',x._scheme,x._scheme_drive_url,x._scheme_drive_link):'');
+$('modalbody').innerHTML=`${media?`<div class="photos">${media}</div>`:''}<div style="display:flex;gap:8px;align-items:center;margin:0 0 14px"><button class="${selectedIds.has(rowId(x))?'lime':'primary'}" id="toggle-board">${selectedIds.has(rowId(x))?'✓ Обрано · Прибрати':'＋ Обрати площину'}</button><span class="legend-note">${selectedIds.has(rowId(x))?'Площина у твоїй адресній програмі':'Додай площину до своєї підбірки'}</span></div><div class="details">${fields.map(([k,v])=>`<div class="detail"><label>${esc(k)}</label><b>${esc(v)}</b></div>`).join('')}</div>`;$('modal').classList.add('open');$('toggle-board').onclick=()=>toggleSelection(x)}
+$('close').onclick=()=>$('modal').classList.remove('open');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open')};
+['f-campaign','f-city','f-partner','f-adformat','f-type','f-restaurant','f-search'].forEach(id=>$(id).addEventListener(id==='f-search'?'input':'change',render));
+$('reset').onclick=()=>{['f-campaign','f-city','f-partner','f-adformat','f-type','f-restaurant','f-search'].forEach(id=>$(id).value='');render()};
+$('save-selection').onclick=saveProgram;$('export-selection').onclick=exportProgram;$('email-selection').onclick=prepareEmail;
+$('fit').onclick=()=>{const pts=markers.map(m=>m.getLatLng());if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[35,35],maxZoom:13})};
+$('sync').onclick=async()=>{if(!GOOGLE_SYNC_ENDPOINT){$('sync-status').textContent='Автооновлення ще не підключене. Для безпечної синхронізації потрібен серверний API, який читає Google Sheets через service account. Не публікуйте таблицю з бюджетами у відкритий доступ. Налаштування описані в інструкції до комплекту.';return}
+try{$('sync').disabled=true;$('sync-status').textContent='Оновлюємо дані з Google Sheets…';const r=await fetch(GOOGLE_SYNC_ENDPOINT,{cache:'no-store',credentials:'include'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();if(!Array.isArray(j.records))throw new Error('Невірний формат відповіді API');DATA.splice(0,DATA.length,...j.records);rebuildFilters();$('sync-status').textContent='Оновлено: '+new Date().toLocaleString('uk-UA');render()}catch(e){$('sync-status').textContent='Не вдалося оновити дані: '+e.message}finally{$('sync').disabled=false}};
+render();setTimeout(()=>{const pts=markers.map(m=>m.getLatLng());if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[35,35],maxZoom:13})},350);
+</script>
+<div class="auth-overlay" id="auth-gate">
+  <div class="auth-card">
+    <div style="font-size:11px;letter-spacing:.14em;color:#005EFF;font-weight:800;margin-bottom:8px">MEDIA FIRST · OOH PLANNING</div>
+    <h2 id="auth-heading">Увійти до платформи</h2>
+    <p id="auth-description">Введи корпоративний email і пароль, щоб відкрити карту та адресні програми.</p>
+    <form id="login-form">
+      <div class="auth-field"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="username" required placeholder="name@mediafirst.ua"></div>
+      <div class="auth-field"><label for="login-password">Пароль</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+      <div class="auth-actions"><button class="primary" type="submit">Увійти</button></div>
+    </form>
+    <form id="bootstrap-form" hidden>
+      <div class="auth-field"><label for="bootstrap-token">Код первинного налаштування</label><input id="bootstrap-token" type="password" autocomplete="off" required></div>
+      <div class="auth-field"><label for="bootstrap-email">Email адміністратора</label><input id="bootstrap-email" type="email" required placeholder="name@mediafirst.ua"></div>
+      <div class="auth-field"><label for="bootstrap-password">Пароль (мінімум 12 символів)</label><input id="bootstrap-password" type="password" minlength="12" required></div>
+      <div class="auth-actions"><button class="primary" type="submit">Створити адміністратора</button></div>
+    </form>
+    <div class="auth-error" id="auth-error"></div>
+    <div style="font-size:11px;color:#8090a0;margin-top:16px">Доступ мають лише запрошені користувачі. Доступи та вибрані площини зберігаються на сервері.</div>
+  </div>
+</div>
+<div class="users-overlay" id="users-overlay" hidden>
+  <div class="users-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>Керування доступами</h2><button id="close-users" type="button">Закрити</button></div>
+    <p>Створи окремий логін для кожного члена команди. User має доступ до карти, бюджетів, вибору площин, збереження й надсилання програм. Admin додатково керує доступами та синхронізацією.</p>
+    <div id="users-list"></div>
+    <form id="add-user-form" style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <div class="auth-field"><label for="new-user-email">Email нового користувача</label><input id="new-user-email" type="email" required></div>
+      <div class="auth-field"><label for="new-user-password">Тимчасовий пароль (12+ символів)</label><input id="new-user-password" type="password" minlength="12" required></div>
+      <div class="auth-field"><label for="new-user-role">Рівень доступу</label><select id="new-user-role"><option value="user">User — перегляд і робота з програмами</option><option value="admin">Admin — повний доступ</option></select></div>
+      <div class="auth-actions"><button class="primary" type="submit">Додати користувача</button></div>
+    </form>
+    <div class="auth-error" id="users-error"></div>
+  </div>
+</div>
+<script>
+(() => {
+  const API='/api';
+  const $id=(id)=>document.getElementById(id);
+  const escapeHtml=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const request=async(path,options={})=>{
+    const headers={...(options.body?{'content-type':'application/json'}:{}),...(options.headers||{})};
+    const response=await fetch(API+path,{credentials:'same-origin',cache:'no-store',...options,headers});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(payload.error||`HTTP ${response.status}`);
+    return payload;
+  };
+  const showError=(id,message)=>{const el=$id(id);if(!el)return;el.textContent=message;el.classList.add('show')};
+  const hideError=(id)=>{const el=$id(id);if(el){el.textContent='';el.classList.remove('show')}};
+  const apiPost=(path,body)=>request(path,{method:'POST',body:JSON.stringify(body)});
+  const bytesToBase64=(bytes)=>{let binary='';const a=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);for(let i=0;i<a.length;i+=0x8000)binary+=String.fromCharCode(...a.subarray(i,i+0x8000));return btoa(binary)};
+  async function makePasswordMaterial(password,saltBase64=null,iterations=600000){
+    const salt=saltBase64?Uint8Array.from(atob(saltBase64),c=>c.charCodeAt(0)):(()=>{const a=new Uint8Array(16);crypto.getRandomValues(a);return a})();
+    const source=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations,hash:'SHA-256'},source,256);
+    return {salt:bytesToBase64(salt),hash:bytesToBase64(bits),rawHash:new Uint8Array(bits)};
+  }
+  async function loginWithPassword(email,password){
+    const challenge=await apiPost('/auth/challenge',{email});
+    const material=await makePasswordMaterial(password,challenge.salt,challenge.iterations||600000);
+    const hmacKey=await crypto.subtle.importKey('raw',material.rawHash,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const signature=await crypto.subtle.sign('HMAC',hmacKey,new TextEncoder().encode(`${challenge.nonce}|${email.trim().toLowerCase()}`));
+    return apiPost('/auth/login',{email,nonce:challenge.nonce,proof:bytesToBase64(signature)});
+  }
+  let currentUser=null;
+  let googleConnected=false;
+  let googleDriveScopeEnabled=false;
+
+  function showAuth(setup){
+    $id('auth-gate').hidden=false;
+    $id('login-form').hidden=!!setup;
+    $id('bootstrap-form').hidden=!setup;
+    $id('auth-heading').textContent=setup?'Первинне налаштування':'Увійти до платформи';
+    $id('auth-description').textContent=setup?'Створи першого адміністратора Media First. Код первинного налаштування задається в Cloudflare Worker Secrets.':'Введи корпоративний email і пароль, щоб відкрити карту та адресні програми.';
+  }
+  function showAccount(){
+    $id('auth-gate').hidden=true;
+    $id('account-toolbar').hidden=false;
+    $id('account-label').textContent=`${currentUser.email} · ${currentUser.role.toUpperCase()}`;
+    $id('manage-users').hidden=currentUser.role!=='admin';
+    $id('connect-google').hidden=currentUser.role!=='admin';
+    $('sync').hidden=currentUser.role!=='admin';
+    $id('drive-library-panel').hidden=currentUser.role!=='admin';
+    const chip=document.querySelector('#selection-panel .role-chip');
+    if(chip)chip.textContent=currentUser.role==='admin'?'ADMIN · повний доступ':'USER · робота з програмами';
+  }
+  async function loadGoogleStatus(){
+    if(currentUser?.role!=='admin')return;
+    try{
+      const s=await request('/google/status');googleConnected=Boolean(s.connected);googleDriveScopeEnabled=Boolean(s.driveScopeEnabled);
+      $id('connect-google').textContent=s.connected?`Apps Script: ${s.email||'підключено'}`:'Google Bridge не підключено';
+      $id('connect-google').title=s.connected?'Google Sheets, Drive та MailApp працюють через Apps Script від імені власника.':'Спочатку налаштуй Apps Script Bridge та Worker Secrets.';
+      $id('test-email').hidden=!s.connected;
+      if(s.bridgeError)$('sync-status').textContent='Apps Script Bridge: '+s.bridgeError;
+      if(s.lastSync?.completed_at){const state=s.lastSync.status==='success'?'Остання синхронізація':'Остання помилка синхронізації';$('sync-status').textContent=`${state}: ${new Date(s.lastSync.completed_at).toLocaleString('uk-UA')} · ${s.lastSync.records_count||0} об'єктів · ${s.lastSync.layers_count||0} шарів${s.lastSync.message?' · '+s.lastSync.message:''}`;}
+    }catch(e){$id('sync-status').textContent='Не вдалося перевірити Google Bridge: '+e.message}
+  }
+  async function loadDriveLibraryStatus(){
+    if(currentUser?.role!=='admin')return;
+    try{
+      const s=await request('/assets/library/status');
+      const el=$id('drive-library-status');
+      if(!googleDriveScopeEnabled){
+        el.textContent=googleConnected?'Google підключений без дозволу Drive. Натисни «Підключити Google» і погодься на додатковий доступ drive.file.':'Спочатку натисни «Підключити Google» та надай доступи Sheets, Gmail і Drive.';
+        return;
+      }
+      el.textContent=`У черзі: ${s.pending||0} · Копійовано: ${s.copied||0} · Потрібна перевірка: ${s.needs_attention||0} · Всього: ${s.total||0}`;
+      if(s.needs_attention&&s.failures?.length){
+        const details=s.failures.slice(0,4).map(x=>`${x.object_title||x.stable_key} (${x.asset_type}): ${x.error_message||'невідома помилка'}`).join(' | ');
+        el.title=details;
+      }
+    }catch(e){$id('drive-library-status').textContent='Drive бібліотека недоступна: '+e.message}
+  }
+  async function runDriveLibraryImport(showConfirm=true){
+    const button=$id('drive-library-start');
+    if(showConfirm&&!confirm('Почати автоматичне копіювання доступних фото та схем у Google Drive? Оригінали в таблиці не змінюються.'))return;
+    button.disabled=true;
+    try{
+      const start=await apiPost('/assets/library/start',{});
+      if(start.shareWarnings?.length)console.warn('Google Drive sharing warnings:',start.shareWarnings);
+      let loops=0;
+      while(loops<1000){
+        loops++;
+        await Promise.all([1,2].map(()=>apiPost('/assets/library/process',{}).catch(e=>({error:e.message}))));
+        const status=await request('/assets/library/status');
+        $id('drive-library-status').textContent=`Автоматичне копіювання: ${status.copied||0} / ${status.total||0} · у черзі ${status.pending||0} · потребують перевірки ${status.needs_attention||0}`;
+        if((status.pending||0)===0&&(status.processing||0)===0)break;
+      }
+      const finalStatus=await request('/assets/library/status');
+      $id('drive-library-status').textContent=`Завершено. Скопійовано: ${finalStatus.copied||0}; потребують перевірки: ${finalStatus.needs_attention||0}; всього матеріалів: ${finalStatus.total||0}.`;
+      const inv=await request('/inventory');applyInventory(inv);
+    }catch(e){
+      $id('drive-library-status').textContent=e.message;
+      if(/drive.file|перепідключити Google|дозвіл Google Drive/i.test(e.message))$id('drive-library-status').textContent=e.message+' Натисни «Підключити Google» угорі та підтверди новий дозвіл Drive.';
+    }finally{button.disabled=false;await loadDriveLibraryStatus()}
+  }
+  async function loadSavedPrograms(){
+    try{const res=await request('/programs');savedPrograms=res.programs||[];renderSavedPrograms()}catch(e){console.warn(e)}
+  }
+  function applyInventory(inventory){
+    const hadData=DATA.length>0;
+    if(Array.isArray(inventory.records)){DATA.splice(0,DATA.length,...inventory.records);}
+    inventoryRevision=inventory.revision||inventoryRevision;
+    configureLayers(inventory.layers||[]);rebuildFilters();render();
+    if(!hadData&&markers.length){const pts=markers.map(m=>m.getLatLng());if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[35,35],maxZoom:13})}
+  }
+  async function refreshInventory(silent=false){
+    if(!currentUser)return;
+    const inventory=await request('/inventory');
+    if(inventory.revision&&inventory.revision!==inventoryRevision){applyInventory(inventory);if(silent)$('sync-status').textContent=`Карту автоматично оновлено: ${new Date().toLocaleString('uk-UA')} · ${inventory.count} об'єктів · ${inventory.layers?.length||0} шарів.`}
+  }
+  function startAutoRefresh(){
+    if(autoRefreshTimer)return;
+    autoRefreshTimer=setInterval(()=>refreshInventory(true).catch(e=>console.warn('Inventory auto refresh:',e)),60000);
+  }
+  async function hydrate(){
+    const [inventory,selection]=await Promise.all([request('/inventory'),request('/selection')]);
+    applyInventory(inventory);
+    selectedIds.clear();(selection.ids||[]).forEach(id=>selectedIds.add(id));
+    render();
+    await loadSavedPrograms();
+    $('sync-status').textContent=`Дані в Cloudflare D1: ${DATA.length} об’єктів у ${layerByKey.size} шарах. Карта перевіряє оновлення щохвилини.`;
+    await loadGoogleStatus();await loadDriveLibraryStatus();startAutoRefresh();
+  }
+  function createWorkbook(){
+    const rows=selectedRows();
+    if(!rows.length)throw new Error('Спочатку обери хоча б одну площину.');
+    if(!window.XLSX)throw new Error('Не завантажилася бібліотека Excel. Перевір інтернет-з’єднання.');
+    const wb=XLSX.utils.book_new();
+    const sourceSheets=[...new Set(rows.map(x=>x._source_sheet||x._layer||'OOH'))];
+    const usedNames=new Set();
+    sourceSheets.forEach(sourceName=>{
+      const sheetName=(String(sourceName).replace(/[\\/?*\[\]:]/g,' ').trim().slice(0,31)||'OOH');
+      let finalName=sheetName,n=2;while(usedNames.has(finalName.toLowerCase())){const suffix=` (${n++})`;finalName=sheetName.slice(0,31-suffix.length)+suffix}usedNames.add(finalName.toLowerCase());
+      const group=rows.filter(x=>(x._source_sheet||x._layer||'OOH')===sourceName);if(!group.length)return;
+      const headers=[];group.forEach(x=>Object.keys(x).forEach(k=>{if(!k.startsWith('_')&&!headers.includes(k))headers.push(k)}));
+      const data=group.map(x=>{const o={};headers.forEach(k=>{if(k==='Фото')o[k]=x._photo?'Фото':(x[k]||'');else if(k==='Схема')o[k]=x._scheme?'Схема':(x[k]||'');else if(x[k]!==null&&x[k]!==undefined)o[k]=x[k]});return o});
+      const ws=XLSX.utils.json_to_sheet(data,{header:headers});
+      group.forEach((x,index)=>[['Фото',x._photo_drive_link||x._photo],['Схема',x._scheme_drive_link||x._scheme]].forEach(([key,url])=>{const col=headers.indexOf(key);if(col<0||typeof url!=='string'||!/^https?:\/\//i.test(url))return;const ref=XLSX.utils.encode_cell({r:index+1,c:col});if(ws[ref])ws[ref].l={Target:url,Tooltip:key==='Фото'?'Відкрити фото':'Відкрити схему'}}));
+      XLSX.utils.book_append_sheet(wb,ws,finalName);
+    });
+    return wb;
+  }
+  function safeFileName(){return ($id('selection-name').value.trim()||'OOH_адресна_програма').replace(/[\\/:*?"<>|]+/g,'_')+'.xlsx'}
+  function renderSavedPrograms(){
+    const target=$id('saved-programs-list');if(!target)return;
+    target.innerHTML='<div class="legend-note" style="font-weight:800;margin-bottom:6px">Збережені програми</div>'+(savedPrograms.length?savedPrograms.map(p=>`<div class="selected-item"><div class="selected-item-main"><b>${escapeHtml(p.name)}</b><small>${(p.ids||[]).length} площин · ${new Date(p.updatedAt||p.createdAt).toLocaleDateString('uk-UA')}</small></div><button data-load-program="${escapeHtml(p.id)}">Відкрити</button></div>`).join(''):'<div class="empty">Збережених програм поки немає.</div>');
+    target.querySelectorAll('[data-load-program]').forEach(b=>b.onclick=()=>{const p=savedPrograms.find(x=>x.id===b.dataset.loadProgram);if(!p)return;selectedIds.clear();(p.ids||[]).forEach(id=>selectedIds.add(id));$id('selection-name').value=p.name;persistSelection();render();$id('selection-status').textContent=`Завантажено програму «${p.name}».`});
+  }
+  // Rebind controls to the Cloudflare-backed handlers (the prototype assigned old function references earlier).
+  $('save-selection').onclick=()=>saveProgram();
+  $('export-selection').onclick=()=>exportProgram();
+  $('email-selection').onclick=()=>prepareEmail();
+
+  // Replace prototype-only local persistence with per-user Cloudflare persistence.
+  persistSelection=()=>{request('/selection',{method:'PUT',body:JSON.stringify({ids:[...selectedIds]})}).catch(e=>{$('selection-status').textContent='Не вдалося зберегти вибір на сервері: '+e.message})};
+  saveProgram=async()=>{
+    try{const res=await request('/programs',{method:'POST',body:JSON.stringify({name:$id('selection-name').value.trim()||'Адресна програма',ids:selectedRows().map(rowId)})});
+      savedPrograms.unshift(res.program);renderSavedPrograms();$('selection-status').textContent=`Програму «${res.program.name}» збережено в Cloudflare для вашого акаунта.`;
+    }catch(e){$('selection-status').textContent=e.message}
+  };
+  exportProgram=()=>{
+    try{const wb=createWorkbook();XLSX.writeFile(wb,safeFileName());$('selection-status').textContent=`Excel сформовано: ${selectedRows().length} площин. Фото та схеми додані як посилання.`}
+    catch(e){$('selection-status').textContent=e.message}
+  };
+  prepareEmail=async()=>{
+    const email=$id('selection-email').value.trim();
+    if(!/^\S+@\S+\.\S+$/.test(email)){$('selection-status').textContent='Вкажи коректну email-адресу.';return}
+    try{
+      const wb=createWorkbook();const fileBase64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+      $('selection-status').textContent='Надсилаю Excel через підключений Gmail…';
+      const result=await request('/programs/send',{method:'POST',body:JSON.stringify({to:email,subject:$id('selection-name').value.trim()||'OOH адресна програма',filename:safeFileName(),fileBase64,count:selectedRows().length,budget:selectedTotal()})});
+      $('selection-status').textContent=`Лист успішно надіслано на ${email}. Excel прикріплено.`;
+    }catch(e){$('selection-status').textContent=e.message}
+  };
+  // Preview resolver: images and partner detail pages are proxied and cached in R2 when available.
+  mediaCard=(kind,url,drivePreviewUrl,driveViewLink)=>{
+    if(!url)return '';const proxy=drivePreviewUrl||('/api/assets/proxy?url='+encodeURIComponent(url));const target=driveViewLink||url;const linkLabel=driveViewLink?'Відкрити копію в Google Drive':(kind==='Фото'?'Відкрити фото':'Відкрити схему');
+    return `<div class="photo-card"><img src="${proxy}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;photo-fallback&quot;>Не вдалося отримати прев’ю.<br>Відкрийте матеріал за посиланням нижче</div>'"><a href="${escapeHtml(target)}" target="_blank" rel="noopener">${linkLabel} ↗</a></div>`;
+  };
+  renderSelection=(()=>{const original=renderSelection;return function(){original();renderSavedPrograms()}})();
+
+  $id('login-form').addEventListener('submit',async e=>{
+    e.preventDefault();hideError('auth-error');
+    try{const res=await loginWithPassword($id('login-email').value,$id('login-password').value);currentUser=res.user;showAccount();await hydrate()}
+    catch(err){showError('auth-error',err.message)}
+  });
+  $id('bootstrap-form').addEventListener('submit',async e=>{
+    e.preventDefault();hideError('auth-error');
+    try{const material=await makePasswordMaterial($id('bootstrap-password').value);const res=await apiPost('/auth/bootstrap',{bootstrapToken:$id('bootstrap-token').value,email:$id('bootstrap-email').value,passwordSalt:material.salt,passwordHash:material.hash});currentUser=res.user;showAccount();await hydrate()}
+    catch(err){showError('auth-error',err.message)}
+  });
+  $id('logout').onclick=async()=>{try{await apiPost('/auth/logout',{})}catch{}location.reload()};
+  $id('connect-google').onclick=async()=>{await loadGoogleStatus();if(!googleConnected)$('sync-status').textContent='Налаштуй Media First OOH Bridge у Google Apps Script; не потрібно активувати Google Cloud Billing.'};
+  $id('test-email').onclick=async()=>{const button=$id('test-email');button.disabled=true;try{const result=await apiPost('/google/test-email',{});$('sync-status').textContent=`Тестовий лист надіслано на ${result.recipient}. Перевір пошту.`}catch(e){$('sync-status').textContent=e.message}finally{button.disabled=false}};
+  $id('drive-library-start').onclick=()=>runDriveLibraryImport(true);
+  $('sync').onclick=async()=>{
+    if(currentUser?.role!=='admin')return;
+    $('sync').disabled=true;$('sync-status').textContent='Перевіряємо всі вкладки Google Sheets та кількість об’єктів…';
+    try{
+      const preview=await apiPost('/google/sync',{preview:true});
+      const layerSummary=(preview.layers||[]).map(l=>`${l.name}: ${l.count}`).join('\n');
+      const decreaseSummary=(preview.layerChanges||[]).map(l=>`${l.sourceSheet}: ${l.previousCount} → ${l.nextCount}${l.removed?' (вкладка більше не містить площин)':''}`).join('\n');
+      if(preview.requiresConfirmation&&!confirm(`Увага: інвентар помітно зменшується. Загалом: ${preview.previousCount} → ${preview.count} (${preview.reductionPercent}%).\n\nЗміни по вкладках:\n${decreaseSummary||'Загальне скорочення інвентаря.'}\n\nНовий склад:\n${layerSummary}\n\nЯкщо це очікувана зміна, підтверди. Якщо ні — скасуй; попередня база залишиться без змін.`)){$('sync-status').textContent='Синхронізацію скасовано. Попередні дані не змінено.';return}
+      const result=await apiPost('/google/sync',{confirmLargeDecrease:preview.requiresConfirmation});
+      const inventory=await request('/inventory');applyInventory(inventory);
+      $('sync-status').textContent=`Оновлено ${result.count} об'єктів у ${result.layers} шарах · ${new Date(result.updatedAt).toLocaleString('uk-UA')}${result.warnings?.length?' · '+result.warnings.join(' | '):''}`;
+      if(result.assetQueue){$('sync-status').textContent+=' · матеріали поставлено в чергу Google Drive';await runDriveLibraryImport(false)}
+    }catch(e){$('sync-status').textContent=e.message}
+    finally{$('sync').disabled=false}
+  };
+  $id('manage-users').onclick=async()=>{
+    hideError('users-error');$id('users-overlay').hidden=false;
+    try{const res=await request('/admin/users');$id('users-list').innerHTML=res.users.map(u=>`<div class="user-row"><div style="flex:1;min-width:140px"><b>${escapeHtml(u.email)}</b><small>Створено ${new Date(u.created_at).toLocaleDateString('uk-UA')}</small></div>${u.id===currentUser.id?'<span class="role-tag">Ваш акаунт · ADMIN</span>':`<select data-user-role="${escapeHtml(u.id)}" style="max-width:150px;padding:6px;border:1px solid var(--line);border-radius:7px"><option value="user" ${u.role==='user'?'selected':''}>User</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select><button data-save-role="${escapeHtml(u.id)}">Роль</button><button data-delete-user="${escapeHtml(u.id)}">Видалити</button>`}</div>`).join('');$id('users-list').querySelectorAll('[data-save-role]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveRole;const role=$id('users-list').querySelector(`[data-user-role="${id}"]`).value;try{await request('/admin/users',{method:'PUT',body:JSON.stringify({id,role})});$id('manage-users').click()}catch(e){showError('users-error',e.message)}});$id('users-list').querySelectorAll('[data-delete-user]').forEach(b=>b.onclick=async()=>{if(!confirm('Видалити цього користувача та його збережені програми?'))return;try{await request('/admin/users?id='+encodeURIComponent(b.dataset.deleteUser),{method:'DELETE'});$id('manage-users').click()}catch(e){showError('users-error',e.message)}})}catch(e){showError('users-error',e.message)}
+  };
+  $id('close-users').onclick=()=>$id('users-overlay').hidden=true;
+  $id('users-overlay').onclick=e=>{if(e.target===$id('users-overlay'))$id('users-overlay').hidden=true};
+  $id('add-user-form').addEventListener('submit',async e=>{
+    e.preventDefault();hideError('users-error');
+    try{const material=await makePasswordMaterial($id('new-user-password').value);await request('/admin/users',{method:'POST',body:JSON.stringify({email:$id('new-user-email').value,passwordSalt:material.salt,passwordHash:material.hash,role:$id('new-user-role').value})});$id('new-user-email').value='';$id('new-user-password').value='';$id('manage-users').click()}
+    catch(err){showError('users-error',err.message)}
+  });
+  async function init(){
+    const query=new URLSearchParams(location.search);if(query.has('google')){const state=query.get('google');$('sync-status').textContent=state==='connected'?'Google-акаунт підключено.':'Google OAuth: '+state;history.replaceState({},'',location.pathname)}
+    try{
+      const status=await request('/auth/status');
+      if(!status.hasUsers){if(status.bootstrapEnabled)showAuth(true);else{showAuth(false);showError('auth-error','Перший адміністратор ще не створений. Налаштуйте BOOTSTRAP_TOKEN у Cloudflare Worker Secrets.')}}
+      else{
+        try{const me=await request('/me');currentUser=me.user;showAccount();await hydrate()}
+        catch{showAuth(false)}
+      }
+    }catch(e){showAuth(false);showError('auth-error','Не вдалося підключитися до Cloudflare API: '+e.message)}
+  }
+  init();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,10 @@
+Це оновлення для вже створеної папки Media_First_OOH_Cloudflare.
+
+НЕ запускайте apply-update.sh з папки цього ZIP.
+Спершу відкрийте Terminal у корені ВАШОГО наявного проєкту (де package.json і wrangler.jsonc).
+Потім введіть: bash  (з пробілом), перетягніть apply-update.sh у Terminal, натисніть Enter.
+
+Оновлення зберігає ваш wrangler.jsonc та .dev.vars, робить backup старих файлів.
+Після встановлення: npm run db:migrate:local, npm run db:migrate:remote, npm test.
+НЕ запускайте повторно npm run db:seed:remote.
+Публікацію поки не запускайте.
